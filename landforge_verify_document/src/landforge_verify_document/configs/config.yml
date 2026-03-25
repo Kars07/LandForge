@@ -1,0 +1,44 @@
+functions:
+  # ── Utility ──────────────────────────────────────────────────────────────
+  current_datetime:
+    _type: current_datetime
+
+  # ── Landforge Document Verification Agent ────────────────────────────────
+  landforge_verify_document:
+    _type: landforge_verify_document
+
+    # Document verification
+    supported_doc_types:
+      - title_deed
+      - certificate_of_occupancy
+      - survey_plan
+      - deed_of_assignment
+      - power_of_attorney
+    verification_strictness: strict   # "strict" | "lenient"
+
+    # Area intelligence
+    area_search_topics:
+      - flood risk
+      - safety
+      - crime rate
+      - infrastructure
+      - development plans
+      - environmental hazards
+    max_search_results_per_topic: 3
+
+    # Hashing
+    hash_algorithm: sha256
+
+llms:
+  nim_llm:
+    _type: nim
+    model_name: nvidia/nemotron-3-super-120b-a12b
+    temperature: 0.4
+    api_key: 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
+
+workflow:
+  _type: react_agent
+  llm_name: nim_llm
+  tool_names:
+    - current_datetime
+    - landforge_verify_document

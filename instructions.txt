@@ -1,0 +1,266 @@
+how to deploy in sui
+ sui client publish --gas-budget 100000000
+ previous deployment in sui
+ INCLUDING DEPENDENCY Bridge
+INCLUDING DEPENDENCY SuiSystem
+INCLUDING DEPENDENCY Sui
+INCLUDING DEPENDENCY MoveStdlib
+BUILDING landforge_smartcontract
+warning[W02021]: duplicate alias
+   ┌─ /home/nagini/land_forge/landforge_smartcontract/sources/landforge_smartcontract.move:15:23
+   │
+15 │     use sui::object::{Self, UID};
+   │                       ^^^^ Unnecessary alias 'object' for module 'sui::object'. This alias is provided by default
+   │
+   = This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+warning[W02021]: duplicate alias
+   ┌─ /home/nagini/land_forge/landforge_smartcontract/sources/landforge_smartcontract.move:15:29
+   │
+15 │     use sui::object::{Self, UID};
+   │                             ^^^ Unnecessary alias 'UID' for module member 'sui::object::UID'. This alias is provided by default
+   │
+   = This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+warning[W02021]: duplicate alias
+   ┌─ /home/nagini/land_forge/landforge_smartcontract/sources/landforge_smartcontract.move:16:27
+   │
+16 │     use sui::tx_context::{Self, TxContext};
+   │                           ^^^^ Unnecessary alias 'tx_context' for module 'sui::tx_context'. This alias is provided by default
+   │
+   = This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+warning[W02021]: duplicate alias
+   ┌─ /home/nagini/land_forge/landforge_smartcontract/sources/landforge_smartcontract.move:16:33
+   │
+16 │     use sui::tx_context::{Self, TxContext};
+   │                                 ^^^^^^^^^ Unnecessary alias 'TxContext' for module member 'sui::tx_context::TxContext'. This alias is provided by default
+   │
+   = This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+warning[W02021]: duplicate alias
+   ┌─ /home/nagini/land_forge/landforge_smartcontract/sources/landforge_smartcontract.move:17:14
+   │
+17 │     use sui::transfer;
+   │              ^^^^^^^^ Unnecessary alias 'transfer' for module 'sui::transfer'. This alias is provided by default
+   │
+   = This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+warning[W09001]: unused alias
+   ┌─ /home/nagini/land_forge/landforge_smartcontract/sources/landforge_smartcontract.move:22:23
+   │
+22 │     use std::string::{Self, String};
+   │                       ^^^^ Unused 'use' of alias 'string'. Consider removing it
+   │
+   = This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+warning[W02021]: duplicate alias
+   ┌─ /home/nagini/land_forge/landforge_smartcontract/sources/landforge_smartcontract.move:23:23
+   │
+23 │     use std::option::{Self, Option};
+   │                       ^^^^ Unnecessary alias 'option' for module 'std::option'. This alias is provided by default
+   │
+   = This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+warning[W02021]: duplicate alias
+   ┌─ /home/nagini/land_forge/landforge_smartcontract/sources/landforge_smartcontract.move:23:29
+   │
+23 │     use std::option::{Self, Option};
+   │                             ^^^^^^ Unnecessary alias 'Option' for module member 'std::option::Option'. This alias is provided by default
+   │
+   = This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+warning[W09011]: unused constant
+   ┌─ /home/nagini/land_forge/landforge_smartcontract/sources/landforge_smartcontract.move:34:11
+   │
+34 │     const EHashMismatch:        u64 = 8;
+   │           ^^^^^^^^^^^^^ The constant 'EHashMismatch' is never used. Consider removing it.
+   │
+   = This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+warning[Lint W99010]: unnecessary `entry` on a `public` function
+    ┌─ /home/nagini/land_forge/landforge_smartcontract/sources/landforge_smartcontract.move:144:12
+    │
+144 │     public entry fun register_listing(
+    │            ^^^^^ `entry` on `public` functions limits composability as it adds restrictions, e.g. the type of each return value must have `drop`. `entry` on `public` is only meaningful in niche scenarios.
+    │
+    = `public` functions can be called from PTBs. `entry` can be used to allow non-`public` functions to be called from PTBs, but it adds restrictions on the usage of input arguments and on the type of return values. Unless this `public` function interacts with an intricate set of other `entry` functions, the `entry` modifier should be removed.
+    = This warning can be suppressed with '#[allow(lint(public_entry))]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+warning[Lint W99010]: unnecessary `entry` on a `public` function
+    ┌─ /home/nagini/land_forge/landforge_smartcontract/sources/landforge_smartcontract.move:208:12
+    │
+208 │     public entry fun purchase_listing(
+    │            ^^^^^ `entry` on `public` functions limits composability as it adds restrictions, e.g. the type of each return value must have `drop`. `entry` on `public` is only meaningful in niche scenarios.
+    │
+    = `public` functions can be called from PTBs. `entry` can be used to allow non-`public` functions to be called from PTBs, but it adds restrictions on the usage of input arguments and on the type of return values. Unless this `public` function interacts with an intricate set of other `entry` functions, the `entry` modifier should be removed.
+    = This warning can be suppressed with '#[allow(lint(public_entry))]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+warning[Lint W99010]: unnecessary `entry` on a `public` function
+    ┌─ /home/nagini/land_forge/landforge_smartcontract/sources/landforge_smartcontract.move:251:12
+    │
+251 │     public entry fun transfer_ownership(
+    │            ^^^^^ `entry` on `public` functions limits composability as it adds restrictions, e.g. the type of each return value must have `drop`. `entry` on `public` is only meaningful in niche scenarios.
+    │
+    = `public` functions can be called from PTBs. `entry` can be used to allow non-`public` functions to be called from PTBs, but it adds restrictions on the usage of input arguments and on the type of return values. Unless this `public` function interacts with an intricate set of other `entry` functions, the `entry` modifier should be removed.
+    = This warning can be suppressed with '#[allow(lint(public_entry))]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+warning[Lint W99010]: unnecessary `entry` on a `public` function
+    ┌─ /home/nagini/land_forge/landforge_smartcontract/sources/landforge_smartcontract.move:308:12
+    │
+308 │     public entry fun delist(
+    │            ^^^^^ `entry` on `public` functions limits composability as it adds restrictions, e.g. the type of each return value must have `drop`. `entry` on `public` is only meaningful in niche scenarios.
+    │
+    = `public` functions can be called from PTBs. `entry` can be used to allow non-`public` functions to be called from PTBs, but it adds restrictions on the usage of input arguments and on the type of return values. Unless this `public` function interacts with an intricate set of other `entry` functions, the `entry` modifier should be removed.
+    = This warning can be suppressed with '#[allow(lint(public_entry))]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+Please report feedback on the linter warnings at https://forums.sui.io
+
+Skipping dependency verification
+Transaction Digest: x4oJBjLukEfnCocVt6yaPEjdBrKMxHzpYwQaaENkf2n
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Transaction Data                                                                                             │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Sender: 0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0                                   │
+│ Gas Owner: 0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0                                │
+│ Gas Budget: 100000000 MIST                                                                                   │
+│ Gas Price: 1000 MIST                                                                                         │
+│ Gas Payment:                                                                                                 │
+│  ┌──                                                                                                         │
+│  │ ID: 0xb2a54671ded61ad425ed9055d0cc774390c24070f656ae789121c18e22df2c62                                    │
+│  │ Version: 634976910                                                                                        │
+│  │ Digest: DfiHKXL3yCKWnpPLdiGj7QM8ovGFWtdyushLW8tro55U                                                      │
+│  └──                                                                                                         │
+│                                                                                                              │
+│ Transaction Kind: Programmable                                                                               │
+│ ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────╮ │
+│ │ Input Objects                                                                                            │ │
+│ ├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤ │
+│ │ 0   Pure Arg: Type: address, Value: "0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0" │ │
+│ ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────╯ │
+│ ╭─────────────────────────────────────────────────────────────────────────╮                                  │
+│ │ Commands                                                                │                                  │
+│ ├─────────────────────────────────────────────────────────────────────────┤                                  │
+│ │ 0  Publish:                                                             │                                  │
+│ │  ┌                                                                      │                                  │
+│ │  │ Dependencies:                                                        │                                  │
+│ │  │   0x0000000000000000000000000000000000000000000000000000000000000001 │                                  │
+│ │  │   0x0000000000000000000000000000000000000000000000000000000000000002 │                                  │
+│ │  └                                                                      │                                  │
+│ │                                                                         │                                  │
+│ │ 1  TransferObjects:                                                     │                                  │
+│ │  ┌                                                                      │                                  │
+│ │  │ Arguments:                                                           │                                  │
+│ │  │   Result 0                                                           │                                  │
+│ │  │ Address: Input  0                                                    │                                  │
+│ │  └                                                                      │                                  │
+│ ╰─────────────────────────────────────────────────────────────────────────╯                                  │
+│                                                                                                              │
+│ Signatures:                                                                                                  │
+│    dNgLX6pQLJKJpjN591DK/NCCLtsITtFeaZeDIXRR0Sf0vEZBJd8z76VzES4hnkYgBO0e93GRHxwgQS2y95TNAw==                  │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Transaction Effects                                                                               │
+├───────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Digest: x4oJBjLukEfnCocVt6yaPEjdBrKMxHzpYwQaaENkf2n                                               │
+│ Status: Success                                                                                   │
+│ Executed Epoch: 1049                                                                              │
+│                                                                                                   │
+│ Created Objects:                                                                                  │
+│  ┌──                                                                                              │
+│  │ ID: 0x07f33acc277bd3e8cb4cec420da32987eb76aa3f5d64a805ddef8259188e1faa                         │
+│  │ Owner: Account Address ( 0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0 )  │
+│  │ Version: 634976911                                                                             │
+│  │ Digest: 6obBtps7cVz8dn7WfduNS7uEMPDsW8QvTq4A3GVh97xA                                           │
+│  └──                                                                                              │
+│  ┌──                                                                                              │
+│  │ ID: 0x2b46435a46f731c392b94f794b52a0cb72c8b62af02e0d854b1bcfe3e8d3b1ed                         │
+│  │ Owner: Account Address ( 0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0 )  │
+│  │ Version: 634976911                                                                             │
+│  │ Digest: DrnxFGPueph9wP9c7gSkcHcDfP8qsGCFqL75YDSaV3JW                                           │
+│  └──                                                                                              │
+│  ┌──                                                                                              │
+│  │ ID: 0xb0e8e4bc923036a01049d35146f89c1ae4b1325b16e4eefe29487ae68192cea9                         │
+│  │ Owner: Immutable                                                                               │
+│  │ Version: 1                                                                                     │
+│  │ Digest: 6m8yMQU7ZuYARnxCpYvvdeExUMXL1ysRcchsLgx7Cdnm                                           │
+│  └──                                                                                              │
+│ Mutated Objects:                                                                                  │
+│  ┌──                                                                                              │
+│  │ ID: 0xb2a54671ded61ad425ed9055d0cc774390c24070f656ae789121c18e22df2c62                         │
+│  │ Owner: Account Address ( 0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0 )  │
+│  │ Version: 634976911                                                                             │
+│  │ Digest: Dw2DufLMGBMPBLJAhk7KkPSpYvzNqL5PHCc7PFkjrMf9                                           │
+│  └──                                                                                              │
+│ Gas Object:                                                                                       │
+│  ┌──                                                                                              │
+│  │ ID: 0xb2a54671ded61ad425ed9055d0cc774390c24070f656ae789121c18e22df2c62                         │
+│  │ Owner: Account Address ( 0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0 )  │
+│  │ Version: 634976911                                                                             │
+│  │ Digest: Dw2DufLMGBMPBLJAhk7KkPSpYvzNqL5PHCc7PFkjrMf9                                           │
+│  └──                                                                                              │
+│ Gas Cost Summary:                                                                                 │
+│    Storage Cost: 30194800 MIST                                                                    │
+│    Computation Cost: 1000000 MIST                                                                 │
+│    Storage Rebate: 978120 MIST                                                                    │
+│    Non-refundable Storage Fee: 9880 MIST                                                          │
+│                                                                                                   │
+│ Transaction Dependencies:                                                                         │
+│    8ZGaWUUUxNqB6EooQC7cngJccxgZZRMYgbzKRLSnExHM                                                   │
+│    BmYjSzzMyDqHdc315Fd84TooLMA4zEecjdmqrvkicd6U                                                   │
+│    G7mezjzbQ1632XhBtFXHD6n8MK6cM36YvpbjVar3TDHi                                                   │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─────────────────────────────╮
+│ No transaction block events │
+╰─────────────────────────────╯
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Object Changes                                                                                                           │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Created Objects:                                                                                                         │
+│  ┌──                                                                                                                     │
+│  │ ObjectID: 0x07f33acc277bd3e8cb4cec420da32987eb76aa3f5d64a805ddef8259188e1faa                                          │
+│  │ Sender: 0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0                                            │
+│  │ Owner: Account Address ( 0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0 )                         │
+│  │ ObjectType: 0xb0e8e4bc923036a01049d35146f89c1ae4b1325b16e4eefe29487ae68192cea9::landforge_smartcontract::PlatformCap  │
+│  │ Version: 634976911                                                                                                    │
+│  │ Digest: 6obBtps7cVz8dn7WfduNS7uEMPDsW8QvTq4A3GVh97xA                                                                  │
+│  └──                                                                                                                     │
+│  ┌──                                                                                                                     │
+│  │ ObjectID: 0x2b46435a46f731c392b94f794b52a0cb72c8b62af02e0d854b1bcfe3e8d3b1ed                                          │
+│  │ Sender: 0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0                                            │
+│  │ Owner: Account Address ( 0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0 )                         │
+│  │ ObjectType: 0x2::package::UpgradeCap                                                                                  │
+│  │ Version: 634976911                                                                                                    │
+│  │ Digest: DrnxFGPueph9wP9c7gSkcHcDfP8qsGCFqL75YDSaV3JW                                                                  │
+│  └──                                                                                                                     │
+│ Mutated Objects:                                                                                                         │
+│  ┌──                                                                                                                     │
+│  │ ObjectID: 0xb2a54671ded61ad425ed9055d0cc774390c24070f656ae789121c18e22df2c62                                          │
+│  │ Sender: 0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0                                            │
+│  │ Owner: Account Address ( 0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0 )                         │
+│  │ ObjectType: 0x2::coin::Coin<0x2::sui::SUI>                                                                            │
+│  │ Version: 634976911                                                                                                    │
+│  │ Digest: Dw2DufLMGBMPBLJAhk7KkPSpYvzNqL5PHCc7PFkjrMf9                                                                  │
+│  └──                                                                                                                     │
+│ Published Objects:                                                                                                       │
+│  ┌──                                                                                                                     │
+│  │ PackageID: 0xb0e8e4bc923036a01049d35146f89c1ae4b1325b16e4eefe29487ae68192cea9                                         │
+│  │ Version: 1                                                                                                            │
+│  │ Digest: 6m8yMQU7ZuYARnxCpYvvdeExUMXL1ysRcchsLgx7Cdnm                                                                  │
+│  │ Modules: landforge_smartcontract                                                                                      │
+│  └──                                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Balance Changes                                                                                   │
+├───────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  ┌──                                                                                              │
+│  │ Owner: Account Address ( 0x774e04b4d3c206cbd6e03aea19ae05dc622fe9726a15cb3303861e627a5b46f0 )  │
+│  │ CoinType: 0x2::sui::SUI                                                                        │
+│  │ Amount: -30216680                                                                              │
+│  └──                                                                                              │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+how to serve ai agent
+nat serve --config_file config.yml

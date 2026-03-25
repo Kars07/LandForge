@@ -1,0 +1,221 @@
+module 0xb0e8e4bc923036a01049d35146f89c1ae4b1325b16e4eefe29487ae68192cea9::landforge_smartcontract {
+    struct PlatformCap has store, key {
+        id: 0x2::object::UID,
+        platform: address,
+    }
+    
+    struct Listing has store, key {
+        id: 0x2::object::UID,
+        seller: address,
+        property_id: 0x1::string::String,
+        property_address: 0x1::string::String,
+        document_type: 0x1::string::String,
+        document_hash: 0x1::string::String,
+        fields_hash: 0x1::string::String,
+        is_verified: bool,
+        is_listed: bool,
+        is_sold: bool,
+        price_mist: u64,
+        escrow: 0x2::balance::Balance<0x2::sui::SUI>,
+        buyer: 0x1::option::Option<address>,
+        decrypt_key_encrypted: 0x1::string::String,
+        decrypt_key_revealed: 0x1::option::Option<0x1::string::String>,
+    }
+    
+    struct OwnershipCertificate has store, key {
+        id: 0x2::object::UID,
+        listing_id: address,
+        owner: address,
+        property_id: 0x1::string::String,
+        property_address: 0x1::string::String,
+        document_hash: 0x1::string::String,
+        fields_hash: 0x1::string::String,
+        document_type: 0x1::string::String,
+        transfer_epoch: u64,
+    }
+    
+    struct ListingRegistered has copy, drop {
+        listing_id: address,
+        seller: address,
+        property_id: 0x1::string::String,
+        document_hash: 0x1::string::String,
+        price_mist: u64,
+    }
+    
+    struct ListingPurchased has copy, drop {
+        listing_id: address,
+        buyer: address,
+        price_mist: u64,
+    }
+    
+    struct OwnershipTransferred has copy, drop {
+        listing_id: address,
+        seller: address,
+        buyer: address,
+        document_hash: 0x1::string::String,
+        certificate_id: address,
+    }
+    
+    struct DocumentVerified has copy, drop {
+        listing_id: address,
+        document_hash: 0x1::string::String,
+        fields_hash: 0x1::string::String,
+    }
+    
+    public entry fun delist(arg0: &mut Listing, arg1: &mut 0x2::tx_context::TxContext) {
+        assert!(0x2::tx_context::sender(arg1) == arg0.seller, 1);
+        assert!(!arg0.is_sold, 5);
+        assert!(0x1::option::is_none<address>(&arg0.buyer), 3);
+        arg0.is_listed = false;
+    }
+    
+    public fun get_buyer(arg0: &Listing) : &0x1::option::Option<address> {
+        &arg0.buyer
+    }
+    
+    public fun get_certificate_document_hash(arg0: &OwnershipCertificate) : &0x1::string::String {
+        &arg0.document_hash
+    }
+    
+    public fun get_certificate_owner(arg0: &OwnershipCertificate) : address {
+        arg0.owner
+    }
+    
+    public fun get_decrypt_key(arg0: &Listing, arg1: &0x2::tx_context::TxContext) : &0x1::option::Option<0x1::string::String> {
+        assert!(0x1::option::is_some<address>(&arg0.buyer) && *0x1::option::borrow<address>(&arg0.buyer) == 0x2::tx_context::sender(arg1), 7);
+        &arg0.decrypt_key_revealed
+    }
+    
+    public fun get_document_hash(arg0: &Listing) : &0x1::string::String {
+        &arg0.document_hash
+    }
+    
+    public fun get_fields_hash(arg0: &Listing) : &0x1::string::String {
+        &arg0.fields_hash
+    }
+    
+    public fun get_price(arg0: &Listing) : u64 {
+        arg0.price_mist
+    }
+    
+    public fun get_seller(arg0: &Listing) : address {
+        arg0.seller
+    }
+    
+    fun init(arg0: &mut 0x2::tx_context::TxContext) {
+        let v0 = PlatformCap{
+            id       : 0x2::object::new(arg0), 
+            platform : 0x2::tx_context::sender(arg0),
+        };
+        0x2::transfer::transfer<PlatformCap>(v0, 0x2::tx_context::sender(arg0));
+    }
+    
+    public fun is_listed(arg0: &Listing) : bool {
+        arg0.is_listed
+    }
+    
+    public fun is_sold(arg0: &Listing) : bool {
+        arg0.is_sold
+    }
+    
+    public fun is_verified(arg0: &Listing) : bool {
+        arg0.is_verified
+    }
+    
+    public entry fun purchase_listing(arg0: &mut Listing, arg1: 0x2::coin::Coin<0x2::sui::SUI>, arg2: &mut 0x2::tx_context::TxContext) {
+        assert!(arg0.is_listed, 4);
+        assert!(!arg0.is_sold, 5);
+        assert!(0x2::coin::value<0x2::sui::SUI>(&arg1) >= arg0.price_mist, 6);
+        let v0 = 0x2::tx_context::sender(arg2);
+        let v1 = 0x2::coin::into_balance<0x2::sui::SUI>(arg1);
+        0x2::balance::join<0x2::sui::SUI>(&mut arg0.escrow, 0x2::balance::split<0x2::sui::SUI>(&mut v1, arg0.price_mist));
+        if (0x2::balance::value<0x2::sui::SUI>(&v1) > 0) {
+            0x2::transfer::public_transfer<0x2::coin::Coin<0x2::sui::SUI>>(0x2::coin::from_balance<0x2::sui::SUI>(v1, arg2), v0);
+        } else {
+            0x2::balance::destroy_zero<0x2::sui::SUI>(v1);
+        };
+        arg0.buyer = 0x1::option::some<address>(v0);
+        let v2 = ListingPurchased{
+            listing_id : 0x2::object::uid_to_address(&arg0.id), 
+            buyer      : v0, 
+            price_mist : arg0.price_mist,
+        };
+        0x2::event::emit<ListingPurchased>(v2);
+    }
+    
+    public entry fun register_listing(arg0: 0x1::string::String, arg1: 0x1::string::String, arg2: 0x1::string::String, arg3: 0x1::string::String, arg4: 0x1::string::String, arg5: u64, arg6: 0x1::string::String, arg7: &mut 0x2::tx_context::TxContext) {
+        let v0 = Listing{
+            id                    : 0x2::object::new(arg7), 
+            seller                : 0x2::tx_context::sender(arg7), 
+            property_id           : arg0, 
+            property_address      : arg1, 
+            document_type         : arg2, 
+            document_hash         : arg3, 
+            fields_hash           : arg4, 
+            is_verified           : true, 
+            is_listed             : true, 
+            is_sold               : false, 
+            price_mist            : arg5, 
+            escrow                : 0x2::balance::zero<0x2::sui::SUI>(), 
+            buyer                 : 0x1::option::none<address>(), 
+            decrypt_key_encrypted : arg6, 
+            decrypt_key_revealed  : 0x1::option::none<0x1::string::String>(),
+        };
+        let v1 = 0x2::object::uid_to_address(&v0.id);
+        let v2 = ListingRegistered{
+            listing_id    : v1, 
+            seller        : 0x2::tx_context::sender(arg7), 
+            property_id   : v0.property_id, 
+            document_hash : v0.document_hash, 
+            price_mist    : arg5,
+        };
+        0x2::event::emit<ListingRegistered>(v2);
+        let v3 = DocumentVerified{
+            listing_id    : v1, 
+            document_hash : v0.document_hash, 
+            fields_hash   : v0.fields_hash,
+        };
+        0x2::event::emit<DocumentVerified>(v3);
+        0x2::transfer::share_object<Listing>(v0);
+    }
+    
+    public entry fun transfer_ownership(arg0: &PlatformCap, arg1: &mut Listing, arg2: 0x1::string::String, arg3: &mut 0x2::tx_context::TxContext) {
+        assert!(0x2::tx_context::sender(arg3) == arg0.platform, 2);
+        assert!(arg1.is_listed, 4);
+        assert!(!arg1.is_sold, 5);
+        assert!(0x1::option::is_some<address>(&arg1.buyer), 7);
+        let v0 = *0x1::option::borrow<address>(&arg1.buyer);
+        0x2::transfer::public_transfer<0x2::coin::Coin<0x2::sui::SUI>>(0x2::coin::from_balance<0x2::sui::SUI>(0x2::balance::split<0x2::sui::SUI>(&mut arg1.escrow, 0x2::balance::value<0x2::sui::SUI>(&arg1.escrow)), arg3), arg1.seller);
+        arg1.decrypt_key_revealed = 0x1::option::some<0x1::string::String>(arg2);
+        arg1.is_sold = true;
+        arg1.is_listed = false;
+        let v1 = OwnershipCertificate{
+            id               : 0x2::object::new(arg3), 
+            listing_id       : 0x2::object::uid_to_address(&arg1.id), 
+            owner            : v0, 
+            property_id      : arg1.property_id, 
+            property_address : arg1.property_address, 
+            document_hash    : arg1.document_hash, 
+            fields_hash      : arg1.fields_hash, 
+            document_type    : arg1.document_type, 
+            transfer_epoch   : 0x2::tx_context::epoch(arg3),
+        };
+        let v2 = OwnershipTransferred{
+            listing_id     : 0x2::object::uid_to_address(&arg1.id), 
+            seller         : arg1.seller, 
+            buyer          : v0, 
+            document_hash  : arg1.document_hash, 
+            certificate_id : 0x2::object::uid_to_address(&v1.id),
+        };
+        0x2::event::emit<OwnershipTransferred>(v2);
+        0x2::transfer::transfer<OwnershipCertificate>(v1, v0);
+    }
+    
+    public fun verify_authenticity(arg0: &Listing, arg1: &0x1::string::String, arg2: &0x1::string::String) : bool {
+        assert!(arg0.is_verified, 9);
+        &arg0.document_hash == arg1 && &arg0.fields_hash == arg2
+    }
+    
+    // decompiled from Move bytecode v6
+}
+

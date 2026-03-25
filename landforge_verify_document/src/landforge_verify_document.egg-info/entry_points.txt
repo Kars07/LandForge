@@ -1,0 +1,2 @@
+[nat.components]
+landforge_verify_document = landforge_verify_document.register
