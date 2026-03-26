@@ -3,3 +3,6 @@
 
 # Ignore Python virtual environment (common name: .venv)
 .venv/
+*.md
+*.txt
+*.txt*

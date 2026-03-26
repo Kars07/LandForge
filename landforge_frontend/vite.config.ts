@@ -11,6 +11,31 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      '/api/nat': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/nat/, ''),
+      },
+      '/api/isw': {
+        target: 'https://qa.interswitchng.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api\/isw/, ''),
+      },
+      '/api/isw-routing': {
+        target: 'https://api-marketplace-routing.k8.isw.la',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api\/isw-routing/, ''),
+      },
+      '/api/isw-sandbox': {
+        target: 'https://sandbox.interswitchng.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api\/isw-sandbox/, ''),
+      },
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

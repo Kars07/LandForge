@@ -4,6 +4,7 @@ import { Building2, LayoutDashboard, List, MessageSquare, HandCoins, Receipt, Us
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
+import { ConnectButton } from '@mysten/dapp-kit';
 
 const landlordLinks = [
   { to: '/landlord/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -97,6 +98,7 @@ const AppLayout = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <ConnectButton />
             <button className="relative text-muted-foreground hover:text-foreground transition-colors">
               <Bell className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full" />

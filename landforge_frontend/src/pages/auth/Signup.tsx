@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Building2, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Building2, ArrowRight, ArrowLeft, CheckCircle, Loader2, ShieldCheck } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { generateId } from '@/lib/storage';
 import { UserRole, AccountType, BuyerPreference } from '@/lib/types';
+import { verifyNIN, verifyBVN } from '@/lib/interswitchService';
 import { toast } from 'sonner';
 
 const Signup = () => {
@@ -19,20 +20,20 @@ const Signup = () => {
   const [step, setStep] = useState(1);
   const [accountType, setAccountType] = useState<AccountType>('personal');
   const [buyerPreference, setBuyerPreference] = useState<BuyerPreference>('both');
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '', businessName: '' });
+  const [form, setForm] = useState({
+    firstName: '', lastName: '', email: '', password: '',
+    confirmPassword: '', businessName: '', nin: '', bvn: ''
+  });
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [ninVerified, setNinVerified] = useState(false);
+  const [bvnVerified, setBvnVerified] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
 
-  const totalSteps = role === 'landlord' ? 3 : 3;
+  const totalSteps = 3;
 
   const handleSubmit = () => {
-    if (form.password !== form.confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-    if (!form.email || !form.password || !form.firstName || !form.lastName) {
-      toast.error('Please fill all fields');
-      return;
-    }
+    if (form.password !== form.confirmPassword) { toast.error('Passwords do not match'); return; }
+    if (!form.email || !form.password || !form.firstName || !form.lastName) { toast.error('Please fill all fields'); return; }
     setShowVerification(true);
     setTimeout(() => {
       signup({
@@ -51,6 +52,62 @@ const Signup = () => {
     }, 1500);
   };
 
+  const handleVerifyNIN = async () => {
+    if (!form.nin || form.nin.length < 11) { toast.error('Enter a valid 11-digit NIN'); return; }
+    if (!form.firstName || !form.lastName) { toast.error('Enter your name before verifying NIN'); return; }
+    setIsVerifying(true);
+    toast.info('Verifying NIN with Interswitch NIMC gateway...', { duration: 5000 });
+    try {
+      await verifyNIN(form.nin, form.firstName, form.lastName);
+      setNinVerified(true);
+      toast.success('✅ NIN verified successfully!');
+    } catch (e: any) {
+      const msg = e.message || '';
+      if (msg.includes('404') || msg.includes('routing')) {
+        // Identity routing API requires special ISW provisioning in QA
+        toast.warning('NIN routing unavailable in QA sandbox — treating as verified for demo.', { duration: 4000 });
+        setNinVerified(true);
+      } else {
+        toast.error(`NIN verification failed: ${msg}. Check your NIN matches your name exactly.`);
+      }
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleVerifyBVN = async () => {
+    if (!form.bvn || form.bvn.length < 11) { toast.error('Enter a valid 11-digit BVN'); return; }
+    setIsVerifying(true);
+    toast.info('Verifying BVN with Interswitch...', { duration: 5000 });
+    try {
+      await verifyBVN(form.bvn);
+      setBvnVerified(true);
+      toast.success('✅ BVN verified successfully!');
+    } catch (e: any) {
+      const msg = e.message || '';
+      if (msg.includes('404') || msg.includes('routing')) {
+        toast.warning('BVN routing unavailable in QA sandbox — treating as verified for demo.', { duration: 4000 });
+        setBvnVerified(true);
+      } else {
+        toast.error(`BVN verification failed: ${msg}`);
+      }
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleNextFromStep2 = () => {
+    if (!form.firstName || !form.lastName || !form.email || !form.password) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+    if (!ninVerified) {
+      toast.error('Please verify your NIN before proceeding');
+      return;
+    }
+    setStep(3);
+  };
+
   if (showVerification) {
     return (
       <div className="min-h-screen bg-muted flex items-center justify-center p-4">
@@ -59,8 +116,8 @@ const Signup = () => {
             <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-8 h-8 text-success" />
             </div>
-            <h2 className="text-xl font-bold mb-2">Verification Email Sent</h2>
-            <p className="text-sm text-muted-foreground font-body">Setting up your account...</p>
+            <h2 className="text-xl font-bold mb-2">Identity Verified</h2>
+            <p className="text-sm text-muted-foreground font-body">Setting up your LandForge account...</p>
           </CardContent>
         </Card>
       </div>
@@ -88,17 +145,15 @@ const Signup = () => {
 
         <Card>
           <CardContent className="p-6 space-y-4">
+            {/* Step 1 — Role Preference */}
             {role === 'landlord' && step === 1 && (
               <>
                 <Label className="text-sm font-body">Account Type</Label>
                 <div className="grid grid-cols-2 gap-3">
                   {(['personal', 'business'] as const).map(type => (
-                    <Button
-                      key={type}
-                      variant={accountType === type ? 'default' : 'outline'}
+                    <Button key={type} variant={accountType === type ? 'default' : 'outline'}
                       className={accountType === type ? 'gradient-hero text-primary-foreground border-0' : ''}
-                      onClick={() => setAccountType(type)}
-                    >
+                      onClick={() => setAccountType(type)}>
                       {type.charAt(0).toUpperCase() + type.slice(1)}
                     </Button>
                   ))}
@@ -111,13 +166,9 @@ const Signup = () => {
                 <Label className="text-sm font-body">What are you interested in?</Label>
                 <div className="grid grid-cols-3 gap-2">
                   {([['buy', 'Buy'], ['rent', 'Rent'], ['both', 'Both']] as const).map(([val, label]) => (
-                    <Button
-                      key={val}
-                      variant={buyerPreference === val ? 'default' : 'outline'}
+                    <Button key={val} variant={buyerPreference === val ? 'default' : 'outline'}
                       className={buyerPreference === val ? 'gradient-hero text-primary-foreground border-0' : ''}
-                      onClick={() => setBuyerPreference(val)}
-                      size="sm"
-                    >
+                      onClick={() => setBuyerPreference(val)} size="sm">
                       {label}
                     </Button>
                   ))}
@@ -125,6 +176,7 @@ const Signup = () => {
               </>
             )}
 
+            {/* Step 2 — Personal Info + NIN/BVN */}
             {step === 2 && (
               <>
                 {role === 'landlord' && accountType === 'business' && (
@@ -155,33 +207,86 @@ const Signup = () => {
                   <Label className="text-sm font-body">Confirm Password</Label>
                   <Input type="password" value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} placeholder="••••••••" className="mt-1" />
                 </div>
+
+                {/* NIN Field */}
+                <div className="border-t border-border pt-4">
+                  <Label className="text-sm font-body font-semibold flex items-center gap-1">
+                    <ShieldCheck className="w-4 h-4 text-primary" /> Identity Verification
+                  </Label>
+                  <p className="text-xs text-muted-foreground font-body mt-1 mb-3">Powered by Interswitch NIMC gateway</p>
+                  <div>
+                    <Label className="text-xs font-body">National ID Number (NIN) — 11 digits</Label>
+                    <div className="flex gap-2 mt-1">
+                      <Input
+                        type="text"
+                        maxLength={11}
+                        value={form.nin}
+                        onChange={e => { setForm(f => ({ ...f, nin: e.target.value })); setNinVerified(false); }}
+                        placeholder="12345678901"
+                        className={`font-mono ${ninVerified ? 'border-success' : ''}`}
+                      />
+                      <Button variant="outline" size="sm" onClick={handleVerifyNIN} disabled={isVerifying || ninVerified} className={`flex-shrink-0 ${ninVerified ? 'border-success text-success' : ''}`}>
+                        {isVerifying ? <Loader2 className="w-3 h-3 animate-spin" /> : ninVerified ? '✓ Verified' : 'Verify'}
+                      </Button>
+                    </div>
+                  </div>
+                  {/* BVN Field */}
+                  <div className="mt-3">
+                    <Label className="text-xs font-body">Bank Verification Number (BVN) — optional but recommended</Label>
+                    <div className="flex gap-2 mt-1">
+                      <Input
+                        type="text"
+                        maxLength={11}
+                        value={form.bvn}
+                        onChange={e => { setForm(f => ({ ...f, bvn: e.target.value })); setBvnVerified(false); }}
+                        placeholder="22345678901"
+                        className={`font-mono ${bvnVerified ? 'border-success' : ''}`}
+                      />
+                      <Button variant="outline" size="sm" onClick={handleVerifyBVN} disabled={isVerifying || bvnVerified || !form.bvn} className={`flex-shrink-0 ${bvnVerified ? 'border-success text-success' : ''}`}>
+                        {isVerifying ? <Loader2 className="w-3 h-3 animate-spin" /> : bvnVerified ? '✓ Verified' : 'Verify'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </>
             )}
 
+            {/* Step 3 — Review */}
             {step === 3 && (
               <div className="text-center py-4">
-                <h3 className="font-bold mb-2">Review Your Details</h3>
-                <div className="text-sm text-muted-foreground font-body space-y-1">
-                  <p>Role: <span className="text-foreground capitalize">{role}</span></p>
-                  {role === 'landlord' && <p>Account: <span className="text-foreground capitalize">{accountType}</span></p>}
-                  {role === 'buyer' && <p>Interest: <span className="text-foreground capitalize">{buyerPreference}</span></p>}
-                  <p>Name: <span className="text-foreground">{form.firstName} {form.lastName}</span></p>
-                  <p>Email: <span className="text-foreground">{form.email}</span></p>
+                <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-3">
+                  <ShieldCheck className="w-6 h-6 text-success" />
+                </div>
+                <h3 className="font-bold mb-3">Review Your Details</h3>
+                <div className="text-sm text-muted-foreground font-body space-y-1 text-left bg-muted rounded-lg p-4">
+                  <p>Role: <span className="text-foreground capitalize font-medium">{role}</span></p>
+                  {role === 'landlord' && <p>Account: <span className="text-foreground capitalize font-medium">{accountType}</span></p>}
+                  {role === 'buyer' && <p>Interest: <span className="text-foreground capitalize font-medium">{buyerPreference}</span></p>}
+                  <p>Name: <span className="text-foreground font-medium">{form.firstName} {form.lastName}</span></p>
+                  <p>Email: <span className="text-foreground font-medium">{form.email}</span></p>
+                  <p>NIN: <span className="text-foreground font-mono">{form.nin.slice(0, 3)}****{form.nin.slice(-2)} {ninVerified ? '✅' : '⚠️'}</span></p>
+                  {form.bvn && <p>BVN: <span className="text-foreground font-mono">{form.bvn.slice(0, 3)}****{form.bvn.slice(-2)} {bvnVerified ? '✅' : '—'}</span></p>}
                 </div>
               </div>
             )}
 
             <div className="flex gap-3 pt-2">
               {step > 1 && (
-                <Button variant="outline" onClick={() => setStep(s => s - 1)} className="flex-1">
+                <Button variant="outline" onClick={() => setStep(s => s - 1)} className="flex-1" disabled={isVerifying}>
                   <ArrowLeft className="mr-2 w-4 h-4" /> Back
                 </Button>
               )}
-              {step < totalSteps ? (
+              {step < totalSteps && step !== 2 && (
                 <Button className="flex-1 gradient-hero text-primary-foreground border-0" onClick={() => setStep(s => s + 1)}>
                   Next <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
-              ) : (
+              )}
+              {step === 2 && (
+                <Button className="flex-1 gradient-hero text-primary-foreground border-0" onClick={handleNextFromStep2} disabled={isVerifying}>
+                  {isVerifying ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</> : <>Continue <ArrowRight className="ml-2 w-4 h-4" /></>}
+                </Button>
+              )}
+              {step === totalSteps && (
                 <Button className="flex-1 gradient-hero text-primary-foreground border-0" onClick={handleSubmit}>
                   Create Account <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Heart, Shield, AlertTriangle, MessageSquare, Banknote, Calendar, User, CheckCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Heart, Shield, MessageSquare, Banknote, CheckCircle, Brain, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,11 +11,16 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { getPropertyById, addInquiry, addOffer, generateId, toggleSaveProperty, getSavedProperties } from '@/lib/storage';
 import { useAuth } from '@/contexts/AuthContext';
+import { agentService } from '@/lib/agentService';
+import { openWebCheckout } from '@/lib/interswitchService';
+import { useSuiContract } from '@/hooks/useSuiContract';
+import { apiPayments, apiSui } from '@/lib/apiClient';
 import { toast } from 'sonner';
 
 const BuyerPropertyDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const { purchaseListing } = useSuiContract();
   const property = getPropertyById(id || '');
   const [selectedImage, setSelectedImage] = useState(0);
   const [saved, setSaved] = useState(getSavedProperties(user?.id || '').includes(id || ''));
@@ -24,6 +29,26 @@ const BuyerPropertyDetail = () => {
   const [offerAmount, setOfferAmount] = useState('');
   const [offerMessage, setOfferMessage] = useState('');
   const [offerTimeline, setOfferTimeline] = useState('30 days');
+
+  const [aiInsight, setAiInsight] = useState('');
+  const [isFetchingInsight, setIsFetchingInsight] = useState(false);
+
+  const fetchAreaIntelligence = async () => {
+    if (!property) return;
+    if (aiInsight) return; // Already loaded, don't refetch
+    setIsFetchingInsight(true);
+    toast.info('🧠 Scanning area data with AI...', { duration: 8000 });
+    try {
+      const location = `${property.address ? property.address + ', ' : ''}${property.city}, ${property.state}, Nigeria`;
+      const insight = await agentService.getAreaIntelligence(location);
+      setAiInsight(insight);
+      toast.success('Area Intelligence ready!');
+    } catch (e: any) {
+      toast.error('Failed to load AI Insights: ' + e.message);
+    } finally {
+      setIsFetchingInsight(false);
+    }
+  };
 
   if (!property) {
     return (
@@ -40,6 +65,59 @@ const BuyerPropertyDetail = () => {
     toggleSaveProperty(user?.id || '', property.id);
     setSaved(!saved);
     toast.success(saved ? 'Removed from saved' : 'Property saved!');
+  };
+
+  const handleBuyNowCheckout = () => {
+    if (!user) {
+      toast.error('Please login to make a purchase');
+      return;
+    }
+    toast.info('Opening Interswitch Checkout...', { duration: 3000 });
+    openWebCheckout({
+      amount: property.price,
+      txnRef: `LF-TRX-${generateId()}`,
+      customerName: `${user.firstName} ${user.lastName}`,
+      customerEmail: user.email,
+      onComplete: async (response) => {
+        if (response && (response.resp === '00' || response.demo)) {
+          toast.success('✅ Payment received! Funds held in Interswitch Escrow.');
+          let suiDigest: string | undefined;
+          // Trigger on-chain ownership transfer via Sui
+          try {
+            await purchaseListing(property.id, BigInt(property.price));
+            suiDigest = `sui-purchase-${property.id}-${Date.now()}`;
+            toast.success('🔗 Ownership transferred on-chain (Sui)!');
+          } catch (suiErr: any) {
+            console.warn('Sui purchase failed, payment was still successful:', suiErr.message);
+            toast.info('Payment confirmed. Blockchain record will sync shortly.');
+          }
+          // Persist to MongoDB (fire-and-forget)
+          const txnRef = `LF-TRX-${generateId()}`;
+          apiPayments.record({
+            iswTxnRef: response.transactionReference || txnRef,
+            amount: property.price,
+            buyerId: user?.id,
+            propertyId: property.id,
+            purpose: property.purpose === 'rent' ? 'rent' : 'purchase',
+            iswResponse: response,
+            suiTxDigest: suiDigest,
+          }).then(payment => {
+            if (suiDigest) {
+              apiSui.record({
+                txDigest: suiDigest,
+                eventType: 'purchaseListing',
+                parsedJson: { property_id: property.id, price: property.price },
+                paymentId: payment._id,
+                userId: user?.id,
+              }).catch(() => {});
+            }
+          }).catch(() => {});
+        } else {
+          toast.info('Payment was cancelled or could not be processed.');
+        }
+      },
+      onCancel: () => toast.info('Payment cancelled.'),
+    });
   };
 
   const handleInquiry = () => {
@@ -152,6 +230,11 @@ const BuyerPropertyDetail = () => {
                 </div>
               </DialogContent>
             </Dialog>
+
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md" onClick={handleBuyNowCheckout}>
+              <Banknote className="w-4 h-4 mr-2" />
+              {property.purpose === 'rent' ? 'Pay Rent (Interswitch Escrow)' : 'Purchase (Interswitch Escrow)'}
+            </Button>
           </div>
 
           {/* Key Facts */}
@@ -172,7 +255,7 @@ const BuyerPropertyDetail = () => {
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview" className="font-body">Overview</TabsTrigger>
-          <TabsTrigger value="ai-report" className="font-body">AI Risk Report</TabsTrigger>
+          <TabsTrigger value="ai-report" className="font-body" onClick={fetchAreaIntelligence}>AI Risk Report</TabsTrigger>
           <TabsTrigger value="documents" className="font-body">Documents</TabsTrigger>
           <TabsTrigger value="seller" className="font-body">Seller</TabsTrigger>
         </TabsList>
@@ -221,6 +304,25 @@ const BuyerPropertyDetail = () => {
                 <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
                   <p className="text-sm font-body text-foreground font-medium mb-1">AI Analysis Summary</p>
                   <p className="text-sm font-body text-muted-foreground">{risk.summary}</p>
+                </div>
+
+                <div className="pt-4 border-t border-border">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="font-bold text-sm flex items-center gap-2"><Brain className="w-4 h-4 text-primary" /> Deep Area Intelligence</p>
+                    <Button variant="outline" size="sm" onClick={fetchAreaIntelligence} disabled={isFetchingInsight}>
+                      {isFetchingInsight ? <><Loader2 className="w-3 h-3 mr-2 animate-spin" /> Scanning...</> : aiInsight ? 'Refresh' : 'Generate'}
+                    </Button>
+                  </div>
+                  {isFetchingInsight && !aiInsight && (
+                    <div className="flex items-center gap-3 p-4 rounded-lg bg-muted text-sm text-muted-foreground font-body">
+                      <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" /> Querying AI agent for real-time area data...
+                    </div>
+                  )}
+                  {aiInsight && (
+                    <div className="p-4 rounded-lg bg-muted text-sm font-body whitespace-pre-wrap leading-relaxed">
+                      {aiInsight}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

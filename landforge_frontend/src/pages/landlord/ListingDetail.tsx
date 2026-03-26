@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Eye, Heart, MessageSquare, Edit, Shield, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, MapPin, Eye, Heart, MessageSquare, Edit, Shield, Brain, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getPropertyById } from '@/lib/storage';
+import { agentService } from '@/lib/agentService';
+import { toast } from 'sonner';
 
 const statusColors: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -18,6 +21,8 @@ const statusColors: Record<string, string> = {
 const LandlordListingDetail = () => {
   const { id } = useParams();
   const property = getPropertyById(id || '');
+  const [aiInsight, setAiInsight] = useState('');
+  const [isFetching, setIsFetching] = useState(false);
 
   if (!property) {
     return (
@@ -29,6 +34,21 @@ const LandlordListingDetail = () => {
   }
 
   const formatPrice = (p: number) => p >= 1000000 ? `₦${(p / 1000000).toFixed(1)}M` : `₦${p.toLocaleString()}`;
+
+  const fetchAreaIntelligence = async () => {
+    setIsFetching(true);
+    toast.info('🧠 Generating Deep Area Intelligence report...', { duration: 8000 });
+    try {
+      const location = `${property.address || ''}, ${property.city}, ${property.state}`.replace(/^,\s*/, '');
+      const insight = await agentService.getAreaIntelligence(location);
+      setAiInsight(insight);
+      toast.success('Area Intelligence report generated!');
+    } catch (e: any) {
+      toast.error('Failed to generate report: ' + e.message);
+    } finally {
+      setIsFetching(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -112,7 +132,8 @@ const LandlordListingDetail = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="ai-report" className="mt-4">
+        <TabsContent value="ai-report" className="mt-4 space-y-4">
+          {/* Static Risk Report */}
           {property.riskReport ? (
             <Card>
               <CardContent className="p-6 space-y-6">
@@ -146,8 +167,34 @@ const LandlordListingDetail = () => {
               </CardContent>
             </Card>
           ) : (
-            <Card><CardContent className="p-8 text-center"><p className="text-muted-foreground font-body">AI report not yet available for this listing</p></CardContent></Card>
+            <Card><CardContent className="p-6 text-center text-muted-foreground font-body text-sm">Static risk report not yet available for this listing.</CardContent></Card>
           )}
+
+          {/* Live AI Area Intelligence */}
+          <Card className="border-primary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Brain className="w-4 h-4 text-primary" />
+                  Deep Area Intelligence (AI-Powered)
+                </span>
+                <Button variant="outline" size="sm" onClick={fetchAreaIntelligence} disabled={isFetching}>
+                  {isFetching ? <><Loader2 className="w-3 h-3 mr-2 animate-spin" /> Generating...</> : 'Generate Report'}
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {aiInsight ? (
+                <div className="p-4 rounded-lg bg-muted text-sm font-body whitespace-pre-wrap leading-relaxed">
+                  {aiInsight}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground font-body text-center py-4">
+                  Click "Generate Report" to get an AI-powered area intelligence analysis for <strong>{property.city}, {property.state}</strong> — covering flood risk, security, infrastructure and more.
+                </p>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
