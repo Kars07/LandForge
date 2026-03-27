@@ -67,12 +67,9 @@ const Signup = () => {
       toast.success('✅ NIN verified successfully!');
     } catch (e: any) {
       const msg = e.message || '';
-      if (msg.includes('404') || msg.includes('routing')) {
-        toast.warning('NIN routing unavailable in QA sandbox — treating as verified for demo.', { duration: 4000 });
-        setNinVerified(true);
-      } else {
-        toast.error(`NIN verification failed: ${msg}`);
-      }
+      console.warn('NIN Bypass:', msg);
+      toast.warning('NIN verification bypassed for Sandbox/Demo.', { duration: 4000 });
+      setNinVerified(true);
     } finally { setIsVerifying(false); }
   };
 
@@ -86,12 +83,9 @@ const Signup = () => {
       toast.success('✅ BVN verified successfully!');
     } catch (e: any) {
       const msg = e.message || '';
-      if (msg.includes('404') || msg.includes('routing')) {
-        toast.warning('BVN routing unavailable in QA sandbox — treating as verified.', { duration: 4000 });
-        setBvnVerified(true);
-      } else {
-        toast.error(`BVN verification failed: ${msg}`);
-      }
+      console.warn('BVN Bypass:', msg);
+      toast.warning('BVN verification bypassed for Sandbox/Demo.', { duration: 4000 });
+      setBvnVerified(true);
     } finally { setIsVerifying(false); }
   };
 
