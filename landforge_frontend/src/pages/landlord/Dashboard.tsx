@@ -63,8 +63,8 @@ const LandlordDashboard = () => {
         }
       }).catch(() => {}),
     ]).then(([props, pays]) => {
-      setProperties(props);
-      setPayments(pays);
+      setProperties(Array.isArray(props) ? props : (props as any)?.data || []);
+      setPayments(Array.isArray(pays) ? pays : (pays as any)?.data || []);
     }).catch(() => {}).finally(() => setIsDataLoading(false));
   }, [user?.id]);
 
@@ -163,11 +163,14 @@ const LandlordDashboard = () => {
     }
   };
 
+  const safeProps = properties || [];
+  const safePays = payments || [];
+
   const stats = [
-    { label: 'Total Listings', value: properties.length, icon: Building2, color: 'text-primary' },
-    { label: 'Active', value: properties.filter(p => p.status === 'active' || p.status === 'live').length, icon: CheckCircle, color: 'text-success' },
-    { label: 'Pending Review', value: properties.filter(p => ['submitted', 'ai_review'].includes(p.status)).length, icon: Clock, color: 'text-warning' },
-    { label: 'Payments Received', value: payments.length, icon: MessageSquare, color: 'text-info' },
+    { label: 'Total Listings', value: safeProps.length, icon: Building2, color: 'text-primary' },
+    { label: 'Active', value: safeProps.filter(p => p?.status === 'active' || p?.status === 'live').length, icon: CheckCircle, color: 'text-success' },
+    { label: 'Pending Review', value: safeProps.filter(p => ['submitted', 'ai_review'].includes(p?.status)).length, icon: Clock, color: 'text-warning' },
+    { label: 'Payments Received', value: safePays.length, icon: MessageSquare, color: 'text-info' },
   ];
 
   return (
@@ -276,11 +279,11 @@ const LandlordDashboard = () => {
         <Card>
           <CardHeader><CardTitle className="text-lg">My Listings</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {properties.length === 0 && (
+            {safeProps.length === 0 && (
               <p className="text-sm text-muted-foreground font-body text-center py-4">No listings yet. Add your first property!</p>
             )}
-            {properties.slice(0, 5).map(prop => (
-              <Link key={prop.id} to={`/landlord/listings/${prop.id}`} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
+            {safeProps.slice(0, 5).map(prop => (
+              <Link key={prop.id || prop._id} to={`/landlord/listings/${prop.id || prop._id}`} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
                 <div className="flex items-center gap-3">
                   <img src={prop.images[0]} alt="" className="w-10 h-10 rounded-lg object-cover" loading="lazy" width={40} height={40} />
                   <div>

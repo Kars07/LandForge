@@ -16,18 +16,23 @@ const BuyerDashboard = () => {
 
   useEffect(() => {
     apiProperties.list({ status: 'active' })
-      .then(data => setProperties(data))
+      .then(data => {
+        if (Array.isArray(data)) setProperties(data);
+        else if (data && Array.isArray((data as any).data)) setProperties((data as any).data);
+        else setProperties([]);
+      })
       .catch(() => setProperties([]))
       .finally(() => setIsLoading(false));
   }, []);
 
+  const safeProperties = properties || [];
   const stats = [
-    { label: 'Total Available', value: properties.length, icon: Building2, color: 'text-primary' },
-    { label: 'For Rent', value: properties.filter(p => p.purpose === 'rent').length, icon: Home, color: 'text-info' },
-    { label: 'For Sale', value: properties.filter(p => p.purpose === 'sale').length, icon: MapPin, color: 'text-success' },
+    { label: 'Total Available', value: safeProperties.length, icon: Building2, color: 'text-primary' },
+    { label: 'For Rent', value: safeProperties.filter(p => p?.purpose === 'rent').length, icon: Home, color: 'text-info' },
+    { label: 'For Sale', value: safeProperties.filter(p => p?.purpose === 'sale').length, icon: MapPin, color: 'text-success' },
   ];
 
-  const recentListings = properties.slice(0, 6);
+  const recentListings = safeProperties.slice(0, 6);
   const normalise = (p: any) => ({ ...p, id: p._id || p.id });
 
   return (
