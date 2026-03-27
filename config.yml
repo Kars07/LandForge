@@ -1,5 +1,6 @@
 general:
   front_end:
+    _type: fastapi
     cors:
       allow_origins:
         - "https://land-forge.vercel.app"

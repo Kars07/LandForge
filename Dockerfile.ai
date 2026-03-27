@@ -26,4 +26,4 @@ RUN uv pip install --system -e ./landforge_verify_document
 EXPOSE 8000
 
 # Start NAT server binding to all interfaces
-CMD ["nat", "run", "config.yml", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["nat", "serve", "--config_file", "config.yml", "--host", "0.0.0.0", "--port", "8000"]
