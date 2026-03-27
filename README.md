@@ -1,6 +1,6 @@
 # LandForge 🏡
 
-**LandForge** is a next-generation real estate and property registry platform tailored for the Nigerian market. It bridges the gap between traditional real estate transactions and decentralized, trustless Web3 infrastructure by combining **Sui Blockchain** smart contracts, **NVIDIA Agentic AI** (NAT) for document verification, and **Interswitch** fiat payment gateways. LandForge is a secure marketplace where landlords list full properties (land or apartments) with verified titles, and investors search, verify risks via AI, and complete purchases or rentals instantly.Every title is tokenized on the Sui blockchain for permanent ownership records. AI instantly flags real-world risks(like floods or low-light electricity reaource) and gives clear recommendations.
+**LandForge** is a next-generation real estate and property registry platform tailored for the Nigerian market.  LandForge is a secure marketplace where landlords list full properties (land or apartments) with verified titles, and investors search, verify risks via AI, and complete purchases or rentals instantly.Every title is tokenized on the Sui blockchain for permanent ownership records. AI instantly flags real-world risks(like floods or low-light electricity resource) and gives clear recommendations.
 
 
 ---
