@@ -124,7 +124,7 @@ const LandlordListingDetail = () => {
                 {property.condition && <div><span className="text-muted-foreground">Condition:</span> <span className="font-medium">{property.condition}</span></div>}
               </div>
               {property.amenities && property.amenities.length > 0 && (
-                <div><p className="text-sm text-muted-foreground mb-2">Amenities:</p><div className="flex flex-wrap gap-2">{property.amenities.map(a => <Badge key={a} variant="secondary" className="font-body text-xs">{a}</Badge>)}</div></div>
+                <div><p className="text-sm text-muted-foreground mb-2">Amenities:</p><div className="flex flex-wrap gap-2">{(property.amenities || []).map((a: string) => <Badge key={a} variant="secondary" className="font-body text-xs">{a}</Badge>)}</div></div>
               )}
             </CardContent>
           </Card>
@@ -132,7 +132,7 @@ const LandlordListingDetail = () => {
 
         <TabsContent value="gallery" className="mt-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {property.images.map((img, i) => (
+            {(property.images || []).map((img: string, i: number) => (
               <div key={i} className="aspect-video rounded-lg overflow-hidden"><img src={img} alt="" className="w-full h-full object-cover" loading="lazy" width={400} height={267} /></div>
             ))}
           </div>
@@ -141,7 +141,7 @@ const LandlordListingDetail = () => {
         <TabsContent value="documents" className="mt-4">
           <Card>
             <CardContent className="p-6 space-y-3">
-              {property.documents.map((doc, i) => (
+              {(property.documents || []).map((doc: any, i: number) => (
                 <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-border">
                   <span className="text-sm font-body">{doc.name}</span>
                   <Badge className={doc.status === 'verified' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'} variant="secondary">{doc.status}</Badge>

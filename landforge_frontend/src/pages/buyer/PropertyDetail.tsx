@@ -166,7 +166,7 @@ const BuyerPropertyDetail = () => {
             <img src={property.images[selectedImage]} alt={property.title} className="w-full h-full object-cover" width={800} height={450} />
           </div>
           <div className="flex gap-2 overflow-x-auto">
-            {property.images.map((img, i) => (
+            {(property.images || []).map((img: string, i: number) => (
               <button key={i} onClick={() => setSelectedImage(i)} className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-colors ${i === selectedImage ? 'border-primary' : 'border-transparent'}`}>
                 <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" width={80} height={56} />
               </button>
@@ -262,7 +262,7 @@ const BuyerPropertyDetail = () => {
             <CardContent className="p-6">
               <p className="font-body text-muted-foreground mb-4">{property.description}</p>
               {property.amenities && property.amenities.length > 0 && (
-                <div><p className="font-bold text-sm mb-2">Amenities</p><div className="flex flex-wrap gap-2">{property.amenities.map(a => <Badge key={a} variant="secondary" className="font-body text-xs">{a}</Badge>)}</div></div>
+                <div><p className="font-bold text-sm mb-2">Amenities</p><div className="flex flex-wrap gap-2">{(property.amenities || []).map((a: string) => <Badge key={a} variant="secondary" className="font-body text-xs">{a}</Badge>)}</div></div>
               )}
             </CardContent>
           </Card>
@@ -331,7 +331,7 @@ const BuyerPropertyDetail = () => {
         <TabsContent value="documents" className="mt-4">
           <Card>
             <CardContent className="p-6 space-y-3">
-              {property.documents.map((doc, i) => (
+              {(property.documents || []).map((doc: any, i: number) => (
                 <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-border">
                   <div className="flex items-center gap-2">
                     <CheckCircle className={`w-4 h-4 ${doc.status === 'verified' ? 'text-success' : 'text-warning'}`} />
