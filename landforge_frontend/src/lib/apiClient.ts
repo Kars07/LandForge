@@ -4,7 +4,9 @@
  * Falls back silently if the backend is unreachable, so the UI never breaks.
  */
 
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// Base URL normalized (removes trailing slashes)
+const ENV_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const BASE = ENV_URL.replace(/\/+$/, '');
 
 // Token helpers (stored separately from AuthContext so apiClient is standalone)
 export const getToken = () => localStorage.getItem('lf_token');
@@ -13,7 +15,8 @@ export const clearToken = () => localStorage.removeItem('lf_token');
 
 async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
   const token = getToken();
-  const res = await fetch(`${BASE}${path}`, {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const res = await fetch(`${BASE}${normalizedPath}`, {
     method,
     headers: {
       'Content-Type': 'application/json',

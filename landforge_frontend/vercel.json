@@ -1,0 +1,24 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/nat/:path*",
+      "destination": "https://<YOUR_NAT_AGENT_URL>/:path*"
+    },
+    {
+      "source": "/api/isw/:path*",
+      "destination": "https://qa.interswitchng.com/:path*"
+    },
+    {
+      "source": "/api/isw-routing/:path*",
+      "destination": "https://api-marketplace-routing.k8.isw.la/:path*"
+    },
+    {
+      "source": "/api/isw-sandbox/:path*",
+      "destination": "https://sandbox.interswitchng.com/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
