@@ -46,7 +46,7 @@ llms:
     _type: nim
     model_name: meta/llama-3.1-8b-instruct
     temperature: 0.0
-    api_key: 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
+    api_key: {NIM_API_KEY}
 
 
 workflow:
