@@ -4,9 +4,12 @@
  * Falls back silently if the backend is unreachable, so the UI never breaks.
  */
 
-// Base URL normalized (removes trailing slashes)
+// Base URL normalized (removes trailing slashes and forces /api)
 const ENV_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const BASE = ENV_URL.replace(/\/+$/, '');
+let BASE = ENV_URL.replace(/\/+$/, '');
+if (!BASE.endsWith('/api')) {
+  BASE += '/api';
+}
 
 // Token helpers (stored separately from AuthContext so apiClient is standalone)
 export const getToken = () => localStorage.getItem('lf_token');
