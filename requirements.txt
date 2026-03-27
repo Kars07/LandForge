@@ -1,0 +1,4 @@
+nvidia-nat[langchain]~=1.5
+./landforge_area_intelligence
+./landforge_hash_document
+./landforge_verify_document

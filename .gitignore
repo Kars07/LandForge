@@ -4,5 +4,6 @@
 # Ignore Python virtual environment (common name: .venv)
 .venv/
 *.md
-*.txt
-*.txt*
+# *.txt
+# *.txt*
+build_summary.txt
