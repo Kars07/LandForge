@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getPropertyById } from '@/lib/storage';
+import { useEffect } from 'react';
+import { apiProperties } from '@/lib/apiClient';
 import { agentService } from '@/lib/agentService';
 import { toast } from 'sonner';
 
@@ -20,9 +21,27 @@ const statusColors: Record<string, string> = {
 
 const LandlordListingDetail = () => {
   const { id } = useParams();
-  const property = getPropertyById(id || '');
+  const [property, setProperty] = useState<any>(null);
+  const [propertyLoading, setPropertyLoading] = useState(true);
   const [aiInsight, setAiInsight] = useState('');
   const [isFetching, setIsFetching] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    apiProperties.get(id)
+      .then(data => setProperty({ ...data, id: data._id }))
+      .catch(() => setProperty(null))
+      .finally(() => setPropertyLoading(false));
+  }, [id]);
+
+  if (propertyLoading) {
+    return (
+      <div className="text-center py-20 flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
+        <p className="text-muted-foreground font-body">Loading property details...</p>
+      </div>
+    );
+  }
 
   if (!property) {
     return (

@@ -60,6 +60,15 @@ const BuyerPropertyDetail = () => {
     }
   };
 
+  if (propertyLoading) {
+    return (
+      <div className="text-center py-20 flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
+        <p className="text-muted-foreground font-body">Loading property details...</p>
+      </div>
+    );
+  }
+
   if (!property) {
     return (
       <div className="text-center py-20">
