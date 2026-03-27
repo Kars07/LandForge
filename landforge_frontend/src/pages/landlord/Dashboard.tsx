@@ -52,6 +52,15 @@ const LandlordDashboard = () => {
       apiPayments.list({ landlordId: user.id }),
       apiWallet.get(user.id).then(w => {
         if (w?.balance !== undefined) setWalletBalance(w.balance);
+        if (w?.iswAccountNumber) {
+          setVirtualAccount({
+            success: true,
+            accountNumber: w.iswAccountNumber,
+            accountName: w.iswAccountName,
+            bankName: w.iswBankName,
+            raw: { payableId: w.iswPayableId, merchantCode: w.iswMerchantCode }
+          });
+        }
       }).catch(() => {}),
     ]).then(([props, pays]) => {
       setProperties(props);
