@@ -1,0 +1,139 @@
+# LandForge 🏡🔗🤖
+
+**LandForge** is a next-generation real estate and property registry platform tailored for the Nigerian market. It bridges the gap between traditional real estate transactions and decentralized, trustless Web3 infrastructure by combining **Sui Blockchain** smart contracts, **NVIDIA Agentic AI** (NAT) for document verification, and **Interswitch** fiat payment gateways.
+
+---
+
+## 🏗️ Architecture Stack
+
+LandForge operates on a robust microservice-inspired architecture:
+
+1. **Frontend (`landforge_frontend/`)**
+   - **Tech:** React, TypeScript, Vite, Tailwind CSS, Shadcn UI
+   - **Role:** The user-facing App. Provides dashboard views for Buyers to search and purchase properties, and Landlords to register verified listings and manage their escrow earnings.
+
+2. **Backend Engine (`landforge_backend/`)**
+   - **Tech:** Node.js, Express, MongoDB, Mongoose
+   - **Role:** Handles traditional Auth (JWT), User Profiles (NIN/BVN statuses), persists Listing Data outside of the blockchain to make searching fast, records offline Escrow/Transaction histories, and exposes REST endpoints.
+
+3. **AI Verification Agents (NVIDIA NAT)**
+   - **Tech:** Python 3.11, NVIDIA Agentic Toolkit (NAT), Llama-3.1-8B (NIM)
+   - **Role:** Exposes an AI pipeline server (port 8000) housing 3 specialized agents:
+     - `landforge_verify_document`: Parses Nigerian Land Titles, Survey Plans, and C of Os, checking strictness parameters.
+     - `landforge_hash_document`: Cryptographically hashes valid documents for exact on-chain matching.
+     - `landforge_area_intelligence`: Fetches and evaluates area safety, flood risks, and amenities.
+
+4. **Smart Contracts (`landforge_smartcontract/`)**
+   - **Tech:** Sui Blockchain (Move Language)
+   - **Role:** The ultimate source of truth. Contains immutable functions like `register_listing` (storing the AI-generated document hashes on-chain) and `purchase_listing` (trustlessly transferring digital ownership of the property token to the buyer).
+
+5. **Fiat Payment Gateway (Interswitch)**
+   - **Role:** 
+     - *Virtual Accounts (Card 360)*: For Landlords.
+     - *WebCheckout*: For Buyers paying rent/buying property securely via card.
+     - *Transfers API*: Automated disbursements from the Escrow back to the Landlord's actual bank account.
+
+---
+
+## 🚀 Local Development Setup
+
+### Prerequisites
+- Node.js (v18+)
+- Python (v3.11)
+- `uv` (Fast Python package manager)
+- MongoDB running locally or a MongoDB Atlas URI
+- Sui CLI (for Move contract publishing)
+
+### 1. Start the Node.js Backend
+```bash
+cd landforge_backend
+npm install
+```
+Create a `.env` in `landforge_backend/`:
+```env
+PORT=3001
+MONGO_URI=mongodb://127.0.0.1:27017/landforge
+JWT_SECRET=your_super_secret_jwt_key
+```
+Run it:
+```bash
+node server.js
+```
+
+### 2. Start the AI Agent (NAT)
+From the root of the project, install the NAT dependencies via `uv`:
+```bash
+uv pip install nvidia-nat[langchain]~=1.5
+uv pip install -e ./landforge_area_intelligence
+uv pip install -e ./landforge_hash_document
+uv pip install -e ./landforge_verify_document
+```
+Ensure you have set the API variable to hit the NVIDIA NIM endpoints:
+```bash
+export NVIDIA_API_KEY="nvapi-your-key-here"
+```
+Run the NAT Server:
+```bash
+nat serve --config_file config.yml --host 0.0.0.0 --port 8000
+```
+
+### 3. Start the React Frontend
+```bash
+cd landforge_frontend
+npm install
+```
+Create a `.env` in `landforge_frontend/`:
+```env
+VITE_API_URL=http://localhost:3001/api
+VITE_NAT_URL=http://localhost:8000
+```
+Run it:
+```bash
+npm run dev
+```
+
+---
+
+## 🌍 Production Deployment
+
+If you are looking to take the project live globally, we have configured everything for a fully free-tier compatible stack on **Vercel** and **Render**.
+
+### Vercel (Frontend)
+1. Import `landforge_frontend` into Vercel.
+2. Before pushing live, ensure you add the Environment Variables:
+   - `VITE_API_URL` -> (URL of your deployed backend)
+   - `VITE_NAT_URL` -> (URL of your deployed NAT instance)
+
+### Render (Node.js Backend)
+1. Create a **Web Service** on Render.
+2. Root Directory: `landforge_backend`
+3. Environment: `Node`
+4. Build Command: `npm install`
+5. Start Command: `node server.js`
+6. *Requirement*: Whitelist `0.0.0.0/0` in MongoDB Atlas Network Access so Render's dynamic IP can connect. Set `MONGO_URI` in Render Environment Variables.
+
+### Render (AI Agent / Python NAT)
+1. Create another **Web Service** on Render using the root directory of the repo.
+2. Environment: `Python` (Render will read `.python-version` and `requirements.txt` automatically)
+3. Build Command: `pip install -r requirements.txt`
+4. Start Command: `nat serve --config_file config.yml --host 0.0.0.0 --port $PORT`
+5. Remember to add `NVIDIA_API_KEY` to your Render Environment Variables.
+
+(*Alternatively, you can deploy the AI Agent using the included `Dockerfile.ai`!*)
+
+---
+
+## 📜 On-Chain Interactions
+The Sui Move smart contract (`landforge_smartcontract.move`) tracks digital land registry events. When a user creates a new listing, the AI verifies the document and generates a `document_hash` and `fields_hash`. These hashes are permanently stored in the `PropertyListing` object on the Sui Testnet, meaning nobody can ever silently alter the structural reality of the title deed. 
+
+When a buyer checks out through Interswitch, `purchase_listing` is called automatically upon payment realization, officially binding the property's digital twin to the Buyer's Sui Wallet Address.
+
+## 🤝 Contributing
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+*Built to bring safety, AI intelligence, and immutable accountability to African Real Estate.*
