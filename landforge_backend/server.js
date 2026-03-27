@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const app = express();
 
 // Middleware
-app.use(cors({ origin: ['http://localhost:8080', 'http://localhost:5173'] }));
+app.use(cors({ origin: ['http://localhost:8080', 'http://localhost:5173', 'https://land-forge.vercel.app'] }));
 app.use(express.json());
 
 // Routes

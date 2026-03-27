@@ -9,8 +9,9 @@ interface VerifyDocumentResult {
 }
 
 
-// Vite proxy: /api/nat -> http://localhost:8000
-const NAT_BASE = '/api/nat';
+// Vite proxy: /api/nat -> http://localhost:8000 (Local)
+// In production, VITE_NAT_URL should point to the deployed NAT server (e.g. https://your-nat-server.onrender.com)
+const NAT_BASE = import.meta.env.VITE_NAT_URL || '/api/nat';
 
 async function callNAT(userMessage: string): Promise<string> {
   const response = await fetch(`${NAT_BASE}/v1/chat/completions`, {

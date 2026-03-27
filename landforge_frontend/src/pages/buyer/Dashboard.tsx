@@ -1,29 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Heart, HandCoins, Home, TrendingUp, MapPin } from 'lucide-react';
+import { Search, Home, MapPin, Building2, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { getProperties, getOffers, getSavedProperties } from '@/lib/storage';
+import { apiProperties } from '@/lib/apiClient';
 import PropertyCard from '@/components/shared/PropertyCard';
 
 const BuyerDashboard = () => {
   const { user } = useAuth();
-  const properties = getProperties().filter(p => p.status === 'live');
-  const offers = getOffers().filter(o => o.buyerId === user?.id || o.buyerId === 'buyer-demo-001');
-  const saved = getSavedProperties(user?.id || '');
   const [searchQuery, setSearchQuery] = useState('');
+  const [properties, setProperties] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    apiProperties.list({ status: 'active' })
+      .then(data => setProperties(data))
+      .catch(() => setProperties([]))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const stats = [
-    { label: 'Saved Properties', value: saved.length, icon: Heart, color: 'text-destructive' },
-    { label: 'Active Offers', value: offers.filter(o => o.status === 'pending').length, icon: HandCoins, color: 'text-accent' },
-    { label: 'Available Rentals', value: properties.filter(p => p.purpose === 'rent').length, icon: Home, color: 'text-info' },
-    { label: 'Recommended', value: properties.length, icon: TrendingUp, color: 'text-primary' },
+    { label: 'Total Available', value: properties.length, icon: Building2, color: 'text-primary' },
+    { label: 'For Rent', value: properties.filter(p => p.purpose === 'rent').length, icon: Home, color: 'text-info' },
+    { label: 'For Sale', value: properties.filter(p => p.purpose === 'sale').length, icon: MapPin, color: 'text-success' },
   ];
 
-  const featured = properties.slice(0, 6);
+  const recentListings = properties.slice(0, 6);
+  const normalise = (p: any) => ({ ...p, id: p._id || p.id });
 
   return (
     <div className="space-y-6">
@@ -48,7 +53,7 @@ const BuyerDashboard = () => {
             </div>
             <Link to="/buyer/properties">
               <Button className="gradient-gold text-accent-foreground border-0 w-full sm:w-auto">
-                <Search className="w-4 h-4 mr-2" /> Search
+                <Search className="w-4 h-4 mr-2" /> Search Real Estate
               </Button>
             </Link>
           </div>
@@ -56,33 +61,49 @@ const BuyerDashboard = () => {
       </Card>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {stats.map(stat => (
           <Card key={stat.label}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <stat.icon className={`w-4 h-4 ${stat.color}`} />
-                <span className="text-xs text-muted-foreground font-body">{stat.label}</span>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <div className="text-xs text-muted-foreground font-body mb-1">{stat.label}</div>
+                <div className="text-2xl font-bold font-display">
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin mt-2" /> : stat.value}
+                </div>
               </div>
-              <div className="text-2xl font-bold font-display">{stat.value}</div>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center bg-muted ${stat.color}`}>
+                <stat.icon className="w-5 h-5" />
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Featured */}
+      {/* Recent Properties from Backend */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Recommended Properties</h2>
-          <Link to="/buyer/properties"><Button variant="ghost" size="sm" className="text-primary font-body">View All →</Button></Link>
+          <h2 className="text-xl font-bold">Recent Listings</h2>
+          <Link to="/buyer/properties"><Button variant="ghost" size="sm" className="text-primary font-body">Browse All →</Button></Link>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featured.map(prop => (
-            <Link key={prop.id} to={`/buyer/properties/${prop.id}`}>
-              <PropertyCard property={prop} />
-            </Link>
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="py-12 flex justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : recentListings.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center text-muted-foreground font-body">
+              No live properties available at the moment.
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {recentListings.map(prop => (
+              <Link key={prop._id} to={`/buyer/properties/${prop._id}`}>
+                <PropertyCard property={normalise(prop)} />
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

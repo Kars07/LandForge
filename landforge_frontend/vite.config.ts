@@ -35,6 +35,12 @@ export default defineConfig(({ mode }) => ({
         secure: true,
         rewrite: (path) => path.replace(/^\/api\/isw-sandbox/, ''),
       },
+      '/api/backend': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/backend/, ''),
+      },
+
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),

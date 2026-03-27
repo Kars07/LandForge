@@ -1,0 +1,29 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv for fast python package management
+RUN pip install uv
+
+# Copy the NAT agents and configuration
+COPY landforge_area_intelligence ./landforge_area_intelligence
+COPY landforge_hash_document ./landforge_hash_document
+COPY landforge_verify_document ./landforge_verify_document
+COPY config.yml .
+
+# Install NAT and the custom agents using uv
+RUN uv pip install --system nvidia-nat[langchain]~=1.5
+RUN uv pip install --system -e ./landforge_area_intelligence
+RUN uv pip install --system -e ./landforge_hash_document
+RUN uv pip install --system -e ./landforge_verify_document
+
+# Expose the default NAT port
+EXPOSE 8000
+
+# Start NAT server binding to all interfaces
+CMD ["nat", "run", "config.yml", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Building2, ArrowRight } from 'lucide-react';
+import { Building2, ArrowRight, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,19 +13,36 @@ const Login = () => {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (!email || !password) {
-      toast.error('Please fill all fields');
-      return;
-    }
-    const success = login(email, password);
-    if (success) {
-      const user = JSON.parse(localStorage.getItem('landforge_user') || '{}');
-      toast.success('Welcome back!');
-      navigate(user.role === 'landlord' ? '/landlord/dashboard' : '/buyer/dashboard');
-    } else {
-      toast.error('Invalid credentials. Please sign up first.');
+  const handleLogin = async () => {
+    if (!email || !password) { toast.error('Please fill all fields'); return; }
+    setIsLoading(true);
+    try {
+      const success = await login(email, password);
+      if (success) {
+        toast.success('Welcome back!');
+        // Role is in the JWT — re-read from apiAuth.me via AuthContext
+        // Navigate after a tick so user state settles
+        setTimeout(() => {
+          // Read role from localStorage user state (set by AuthContext)
+          const stored = localStorage.getItem('lf_token');
+          if (stored) {
+            try {
+              const payload = JSON.parse(atob(stored.split('.')[1]));
+              navigate(payload.role === 'landlord' ? '/landlord/dashboard' : '/buyer/dashboard');
+            } catch {
+              navigate('/');
+            }
+          }
+        }, 100);
+      } else {
+        toast.error('Invalid email or password');
+      }
+    } catch (e: any) {
+      toast.error(e.message || 'Login failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -47,20 +64,16 @@ const Login = () => {
           <CardContent className="p-6 space-y-4">
             <div>
               <Label className="text-sm font-body">Email</Label>
-              <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="john@example.com" className="mt-1" />
+              <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="john@example.com" className="mt-1"
+                onKeyDown={e => e.key === 'Enter' && handleLogin()} />
             </div>
             <div>
               <Label className="text-sm font-body">Password</Label>
-              <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="mt-1" />
+              <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="mt-1"
+                onKeyDown={e => e.key === 'Enter' && handleLogin()} />
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 font-body text-muted-foreground">
-                <input type="checkbox" className="rounded border-border" /> Remember me
-              </label>
-              <span className="text-primary font-body cursor-pointer hover:underline">Forgot password?</span>
-            </div>
-            <Button className="w-full gradient-hero text-primary-foreground border-0" size="lg" onClick={handleLogin}>
-              Log in <ArrowRight className="ml-2 w-4 h-4" />
+            <Button className="w-full gradient-hero text-primary-foreground border-0" size="lg" onClick={handleLogin} disabled={isLoading}>
+              {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Logging in...</> : <>Log in <ArrowRight className="ml-2 w-4 h-4" /></>}
             </Button>
           </CardContent>
         </Card>

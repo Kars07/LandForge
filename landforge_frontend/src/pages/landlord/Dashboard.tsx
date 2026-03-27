@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, MessageSquare, HandCoins, Building2, Clock, CheckCircle, TrendingUp, Wallet, ArrowUpRight, CreditCard, Loader2, X, Banknote } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,9 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
-import { getProperties, getInquiries, getOffers, getTransactions } from '@/lib/storage';
+import { apiProperties, apiPayments, apiWallet, apiWithdrawals } from '@/lib/apiClient';
 import { createVirtualAccount, initiateTransfer, VirtualAccountResult } from '@/lib/interswitchService';
-import { apiWallet, apiWithdrawals } from '@/lib/apiClient';
 import { toast } from 'sonner';
 
 const statusColors: Record<string, string> = {
@@ -42,10 +41,23 @@ const BANKS = [
 
 const LandlordDashboard = () => {
   const { user } = useAuth();
-  const properties = getProperties().filter(p => p.landlordId === user?.id || p.landlordId === 'landlord-demo-001');
-  const inquiries = getInquiries();
-  const offers = getOffers().filter(o => o.landlordId === user?.id || o.landlordId === 'landlord-demo-001');
-  const transactions = getTransactions().filter(t => t.landlordId === user?.id || t.landlordId === 'landlord-demo-001');
+  const [properties, setProperties] = useState<any[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    Promise.all([
+      apiProperties.list({ landlordId: user.id }),
+      apiPayments.list({ landlordId: user.id }),
+      apiWallet.get(user.id).then(w => {
+        if (w?.balance !== undefined) setWalletBalance(w.balance);
+      }).catch(() => {}),
+    ]).then(([props, pays]) => {
+      setProperties(props);
+      setPayments(pays);
+    }).catch(() => {}).finally(() => setIsDataLoading(false));
+  }, [user?.id]);
 
   // Virtual Account state
   const [virtualAccount, setVirtualAccount] = useState<VirtualAccountResult | null>(null);
@@ -53,7 +65,7 @@ const LandlordDashboard = () => {
   const [showVAModal, setShowVAModal] = useState(false);
 
   // Wallet / Transfer state
-  const [walletBalance, setWalletBalance] = useState(5_000_000);
+  const [walletBalance, setWalletBalance] = useState(0);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawForm, setWithdrawForm] = useState({ bankCode: 'GTB', accountNumber: '', amount: '' });
@@ -144,9 +156,9 @@ const LandlordDashboard = () => {
 
   const stats = [
     { label: 'Total Listings', value: properties.length, icon: Building2, color: 'text-primary' },
-    { label: 'Active', value: properties.filter(p => p.status === 'live').length, icon: CheckCircle, color: 'text-success' },
+    { label: 'Active', value: properties.filter(p => p.status === 'active' || p.status === 'live').length, icon: CheckCircle, color: 'text-success' },
     { label: 'Pending Review', value: properties.filter(p => ['submitted', 'ai_review'].includes(p.status)).length, icon: Clock, color: 'text-warning' },
-    { label: 'Inquiries', value: inquiries.length, icon: MessageSquare, color: 'text-info' },
+    { label: 'Payments Received', value: payments.length, icon: MessageSquare, color: 'text-info' },
   ];
 
   return (

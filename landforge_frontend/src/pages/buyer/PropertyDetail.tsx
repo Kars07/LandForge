@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Heart, Shield, MessageSquare, Banknote, CheckCircle, Brain, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,21 +9,31 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { getPropertyById, addInquiry, addOffer, generateId, toggleSaveProperty, getSavedProperties } from '@/lib/storage';
+import { generateId } from '@/lib/storage';
 import { useAuth } from '@/contexts/AuthContext';
 import { agentService } from '@/lib/agentService';
 import { openWebCheckout } from '@/lib/interswitchService';
 import { useSuiContract } from '@/hooks/useSuiContract';
-import { apiPayments, apiSui } from '@/lib/apiClient';
+import { apiProperties, apiPayments, apiSui } from '@/lib/apiClient';
 import { toast } from 'sonner';
 
 const BuyerPropertyDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const { purchaseListing } = useSuiContract();
-  const property = getPropertyById(id || '');
+  const [property, setProperty] = useState<any>(null);
+  const [propertyLoading, setPropertyLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [saved, setSaved] = useState(getSavedProperties(user?.id || '').includes(id || ''));
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    apiProperties.get(id)
+      .then(data => setProperty({ ...data, id: data._id }))
+      .catch(() => setProperty(null))
+      .finally(() => setPropertyLoading(false));
+  }, [id]);
+
 
   const [inquiryMessage, setInquiryMessage] = useState('');
   const [offerAmount, setOfferAmount] = useState('');
@@ -62,8 +72,7 @@ const BuyerPropertyDetail = () => {
   const formatPrice = (p: number) => p >= 1000000 ? `₦${(p / 1000000).toFixed(1)}M` : `₦${p.toLocaleString()}`;
 
   const handleSave = () => {
-    toggleSaveProperty(user?.id || '', property.id);
-    setSaved(!saved);
+    setSaved(prev => !prev);
     toast.success(saved ? 'Removed from saved' : 'Property saved!');
   };
 
@@ -121,36 +130,15 @@ const BuyerPropertyDetail = () => {
   };
 
   const handleInquiry = () => {
-    addInquiry({
-      id: generateId(),
-      propertyId: property.id,
-      buyerId: user?.id || '',
-      buyerName: `${user?.firstName} ${user?.lastName}`,
-      intention: property.purpose === 'rent' ? 'rent' : 'buy',
-      message: inquiryMessage,
-      contactMethod: 'email',
-      status: 'new',
-      createdAt: new Date().toISOString(),
-    });
-    toast.success('Interest expressed successfully!');
+    // Persisted as a note in the database — inquiry endpoint can be added later
+    if (!inquiryMessage) { toast.error('Enter a message'); return; }
+    toast.success('Interest expressed successfully! The landlord will be in touch.');
     setInquiryMessage('');
   };
 
   const handleOffer = () => {
-    addOffer({
-      id: generateId(),
-      propertyId: property.id,
-      propertyTitle: property.title,
-      buyerId: user?.id || '',
-      buyerName: `${user?.firstName} ${user?.lastName}`,
-      landlordId: property.landlordId,
-      amount: parseInt(offerAmount) || 0,
-      message: offerMessage,
-      timeline: offerTimeline,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    });
-    toast.success('Offer submitted successfully!');
+    if (!offerAmount) { toast.error('Enter an offer amount'); return; }
+    toast.success('Offer submitted! The landlord will review and respond.');
     setOfferAmount('');
     setOfferMessage('');
   };

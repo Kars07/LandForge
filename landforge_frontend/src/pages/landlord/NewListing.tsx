@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
-import { addProperty, generateId } from '@/lib/storage';
+import { generateId } from '@/lib/storage';
 import { PropertyType, ListingPurpose } from '@/lib/types';
 import { agentService } from '@/lib/agentService';
 import { useSuiContract } from '@/hooks/useSuiContract';
@@ -128,39 +128,8 @@ const NewListing = () => {
         }).catch(() => {});
       }).catch(() => {});
 
-      // Save locally
-      addProperty({
-        id: propertyId,
-        landlordId: user?.id || 'landlord-demo-001',
-        title: form.title,
-        type: form.type,
-        purpose: form.purpose,
-        price: parseInt(form.price) || 0,
-        state: form.state,
-        city: form.city,
-        address: form.address,
-        description: form.description,
-        plotSize: form.plotSize || undefined,
-        bedrooms: form.bedrooms ? parseInt(form.bedrooms) : undefined,
-        bathrooms: form.bathrooms ? parseInt(form.bathrooms) : undefined,
-        furnished: form.furnished,
-        parking: form.parking,
-        powerSupply: form.powerSupply || undefined,
-        waterSupply: form.waterSupply || undefined,
-        security: form.security || undefined,
-        condition: form.condition || undefined,
-        yearBuilt: form.yearBuilt || undefined,
-        amenities: form.amenities,
-        images,
-        documents: documents.map(d => ({ name: d, type: 'document', status: 'uploaded' as const, uploadedAt: new Date().toISOString() })),
-        status: 'submitted',
-        views: 0,
-        saves: 0,
-        inquiryCount: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-
+      // Property is persisted to MongoDB via apiProperties.create above.
+      // Navigate immediately — listings page now fetches from the backend.
       toast.success('Property submitted and anchored on-chain!');
       navigate('/landlord/listings');
 
