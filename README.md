@@ -1,6 +1,72 @@
 # LandForge 🏡🔗🤖
 
-**LandForge** is a next-generation real estate and property registry platform tailored for the Nigerian market. It bridges the gap between traditional real estate transactions and decentralized, trustless Web3 infrastructure by combining **Sui Blockchain** smart contracts, **NVIDIA Agentic AI** (NAT) for document verification, and **Interswitch** fiat payment gateways.
+**LandForge** is a next-generation real estate and property registry platform tailored for the Nigerian market. It bridges the gap between traditional real estate transactions and decentralized, trustless Web3 infrastructure by combining **Sui Blockchain** smart contracts, **NVIDIA Agentic AI** (NAT) for document verification, and **Interswitch** fiat payment gateways. LandForge is a secure marketplace where landlords list full properties (land or apartments) with verified titles, and investors search, verify risks via AI, and complete purchases or rentals instantly.Every title is tokenized on the Sui blockchain for permanent ownership records. AI instantly flags real-world risks(like floods or low-light electricity reaource) and gives clear recommendations.
+
+
+---
+
+## 🔗 Live Application : [https://land-forge.vercel.app]
+
+## PRD Document: https://docs.google.com/document/d/1dAG8Elm0nejEA64KeG_UPN6LzvAwWvt2hYreltWmqfE/edit?usp=drivesdk
+
+---
+
+## 📌 The Problem
+Real estate in Nigeria is currently a high-risk venture, with **land fraud costing over ₦300 billion annually**. Local buyers and Diaspora investors (UK, US, Canada) face a massive trust gap because they cannot safely purchase or rent properties without:
+
+* **Costly Physical Verification:** Needing to fly home just to verify the physical existence of a property.
+* **Document Forgery:** Relying on agents who may provide forged Certificates of Occupancy (C of O) or survey plans.
+* **Hidden Environmental Risks:** Facing post-purchase surprises like severe flooding or unreliable local power infrastructure ("no light").
+* **Lack of Secure Escrow:** High risk of losing capital to "ghost" landlords with no way to recover funds.
+
+## 💡 The LandForge Solution
+LandForge digitizes the entire lifecycle of a property transaction to solve these hurdles:
+* **AI-Driven Vetting:** Uses **NVIDIA Agentic AI** to instantly parse and verify the authenticity of Nigerian land documents from anywhere in the world.
+* **Immutable Registry:** All verified document hashes are stored on the **Sui Blockchain**, creating a "digital twin" that prevents double-selling.
+* **Integrated Escrow:** Seamlessly handles fiat-to-blockchain transactions via **Interswitch**, ensuring funds are only released when digital ownership is transferred.
+* **Environmental Intelligence:** Provides instant data on flood risks, amenity proximity, and area safety via specialized AI agents.
+
+## 🚀 Why LandForge is Better
+Unlike existing property listing sites—which act as simple digital classified ads—LandForge is a **validation and settlement engine**.
+
+
+| Feature | Traditional Apps | LandForge |
+| :--- | :--- | :--- |
+| **Verification** | Manual / None | **Automated AI Document Parsing** |
+| **Security** | Centralized Database | **Decentralized Sui Smart Contracts** |
+| **Double Selling** | Possible | **Impossible (On-chain ownership)** |
+| **Payments** | External/Manual | **Deep Interswitch Integration** |
+| **Data** | Static Images | **AI-Powered Area Intelligence** |
+
+---
+
+## 💳 Interswitch API Integration
+We leverage Interswitch’s robust infrastructure to ensure secure and familiar financial flows:
+* **WebCheckout:** Allows buyers to securely pay for property listings or rent using their cards or bank transfers.
+* **Virtual Accounts (Card 360):** Provides landlords with dedicated accounts to receive payments seamlessly.
+* **Transfers API:** Automates the disbursement of funds from the secure escrow system to the landlord's verified bank account upon successful transaction completion.
+
+---
+
+## 👥 The Team & Roles
+* **Adetola Fathiat**: Project Manager — Spearheaded strategy, coordination, and project delivery timelines.
+* **Eniaiyejuni Raphael**: AI & Blockchain Developer — Built the NVIDIA AI agents and developed the Sui Move smart contracts.
+* **Abibi Daniella**: Backend Developer — Engineered the API integrations, Interswitch payment flows, and the Escrow management system.
+* **Oloyede Micheal**: Frontend Developer — Designed the user interface and managed the repository documentation.
+
+---
+
+## 🧪 Testing Credentials (For Judges)
+
+### Web Application Access
+* **Email:** [INSERT TEST EMAIL HERE]
+* **Password:** [INSERT TEST PASSWORD HERE]
+
+### Wallet & Blockchain Testing
+LandForge operates on the **Sui Network**. To test the blockchain interactions:
+1.  Download the **Sui Wallet** or **Stashed Wallet** extension.
+2.  **Test Wallet Credentials:** [INSERT MNEMONIC OR PRIVATE KEY HERE]
+3.  Ensure your wallet is set to the **Sui Testnet**.
 
 ---
 
