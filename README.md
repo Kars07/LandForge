@@ -66,10 +66,10 @@ We leverage Interswitch’s robust infrastructure to ensure secure and familiar 
 -Buyer Dashboard 
 * **Email:** officialswiftfund@gmail.com 
 * **Password:** Olamkesh34
-
+ 
 - Note: LandForge operates on the **Sui Network**. Before you can start any activity like listing properties you have to connect your wallet first..
 
-- first you download Slush wallet via chrome web store
+- first you download Slush wallet https://chromewebstore.google.com/detail/slush-%E2%80%94-a-sui-wallet/opcgpfmipidbgpenhmajoajpbobppdil?authuser=2 via chrome web store
 - Then login using this private key **"suiprivkey1qqzzwc8rg040ej9r4vc62gx4je9eqe8qq5q45glsn4j4zgd3x0ymkxnpdu7".**
 - After that go back to Landforge application and connect wallet
 
