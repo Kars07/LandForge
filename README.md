@@ -59,8 +59,13 @@ We leverage Interswitch’s robust infrastructure to ensure secure and familiar 
 ## 🧪 Testing Credentials (For Judges)
 
 ### Web Application Access
-* **Email:** [INSERT TEST EMAIL HERE]
-* **Password:** [INSERT TEST PASSWORD HERE]
+-Landlord Dashboard 
+* **Email:** kemisolaolamide68@gmail.com
+* **Password:** Zephany12
+
+-Buyer Dashboard 
+* **Email:** officialswiftfund@gmail.com 
+* **Password:** Olamkesh34
 
 ### Wallet & Blockchain Testing
 LandForge operates on the **Sui Network**. To test the blockchain interactions:
