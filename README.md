@@ -67,13 +67,11 @@ We leverage Interswitch’s robust infrastructure to ensure secure and familiar 
 * **Email:** officialswiftfund@gmail.com 
 * **Password:** Olamkesh34
 
-### Wallet & Blockchain Testing
-LandForge operates on the **Sui Network**. To test the blockchain interactions:
-1.  Download the **Sui Wallet** or **Stashed Wallet** extension.
-2.  **Test Wallet Credentials:** [INSERT MNEMONIC OR PRIVATE KEY HERE]
-3.  Ensure your wallet is set to the **Sui Testnet**.
+- Note: LandForge operates on the **Sui Network**. Before you can start any activity like listing properties you have to connect your wallet first..
 
----
+- first you download Slush wallet via chrome web store
+- Then login using this private key ** "suiprivkey1qqzzwc8rg040ej9r4vc62gx4je9eqe8qq5q45glsn4j4zgd3x0ymkxnpdu7".**
+- After that go back to Landforge application and connect wallet
 
 ## 🏗️ Architecture Stack
 
