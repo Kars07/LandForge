@@ -70,6 +70,7 @@ We leverage Interswitch’s robust infrastructure to ensure secure and familiar 
 - Note: LandForge operates on the **Sui Network**. Before you can start any activity like listing properties you have to connect your wallet first..
 
 - first you download Slush wallet https://chromewebstore.google.com/detail/slush-%E2%80%94-a-sui-wallet/opcgpfmipidbgpenhmajoajpbobppdil?authuser=2 via chrome web store
+- once the slush wallet is downloaded on the slush app click on "more options" and then click on "import from private key"
 - Then login using this private key **"suiprivkey1qqzzwc8rg040ej9r4vc62gx4je9eqe8qq5q45glsn4j4zgd3x0ymkxnpdu7".**
 - After that go back to Landforge application and connect wallet
 - Another important issue is that Render(deployment services used to deploy landforge) sleeps so It takes approximately 60 seconds for Backend fetching to work, so trying to register an account, sign in, AI analysis, and others would take a little time, we ask for patience from the Judges. Thank you!
